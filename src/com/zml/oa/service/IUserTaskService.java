@@ -22,5 +22,7 @@ public interface IUserTaskService {
 	public List<UserTask> findByWhere(String procDefKey) throws Exception;
 	
 	public List<UserTask> getAll() throws Exception;
+
+	public void deleteByWhere(String proDefKey);
 	
 }

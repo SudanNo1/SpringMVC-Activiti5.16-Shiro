@@ -119,24 +119,30 @@ public class PermissionAction {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/loadSingleBpmn")
+	@ResponseBody
 	public String loadSingleBpmn(@RequestParam("processDefinitionId") String processDefinitionId,
 								RedirectAttributes redirectAttributes) throws Exception{
 		ProcessDefinition processDefinition = repositoryService.getProcessDefinition(processDefinitionId);
 		//读取节点信息保存到usertask表
 		setSingleActivitiInfo(processDefinition);
-		redirectAttributes.addFlashAttribute("message", "加载成功！");
-		return "redirect:/permissionAction/loadBpmn_page";
+		return "ok";
+//		redirectAttributes.addFlashAttribute("message", "加载成功！");
+//		return "redirect:/permissionAction/loadBpmn_page";
 	}
 
 	
 	private void setSingleActivitiInfo(ProcessDefinition processDefinition) throws Exception{
 		String proDefKey = processDefinition.getKey();
-		List<UserTask> list = this.userTaskService.findByWhere(proDefKey);
+//		List<UserTask> list = this.userTaskService.findByWhere(proDefKey);
+		try {
+			this.userTaskService.deleteByWhere(proDefKey);
+		} catch (Exception e) {
+		}
 		ProcessDefinitionEntity processDef = (ProcessDefinitionEntity) repositoryService.getProcessDefinition(processDefinition.getId());
 		List<ActivityImpl> activitiList = processDef.getActivities();//获得当前任务的所有节点
 		for (ActivityImpl activity : activitiList) {
 			ActivityBehavior activityBehavior = activity.getActivityBehavior();
-			boolean isFound = false;
+//			boolean isFound = false;
 			//是否为用户任务
 			if (activityBehavior instanceof UserTaskActivityBehavior) {
 				UserTaskActivityBehavior userTaskActivityBehavior = (UserTaskActivityBehavior) activityBehavior;
@@ -145,7 +151,7 @@ public class PermissionAction {
 	            String taskDefKey = taskDefinition.getKey();
 	            Expression taskName = taskDefinition.getNameExpression();
 	            
-	            //判断表中是否存在此节点
+	            /*判断表中是否存在此节点
 	            if(list.size() != 0){
 					for(UserTask userTask : list){
 						if(taskDefKey.equals(userTask.getTaskDefKey())){
@@ -154,20 +160,20 @@ public class PermissionAction {
 				            userTask.setTaskDefKey(taskDefKey);
 				            userTask.setTaskName(taskName.toString());
 				            this.userTaskService.doUpdate(userTask);
-				            isFound = true;
+//				            isFound = true;
 				            break;
 						}
 					}
 					
 				}
-	            if(!isFound){
+	            if(!isFound){*/
 	            	UserTask userTask = new UserTask();
 		            userTask.setProcDefKey(processDefinition.getKey());
 		            userTask.setProcDefName(processDefinition.getName());
 		            userTask.setTaskDefKey(taskDefKey);
 		            userTask.setTaskName(taskName.toString());
 		            this.userTaskService.doAdd(userTask);
-	            }
+//	            }
 			}
 		}
 	}
@@ -268,7 +274,7 @@ public class PermissionAction {
 		Page<Object> p = new Page<Object>(page, rows);
 		List<Object> jsonList=new ArrayList<Object>(); 
 		
-		ProcessDefinitionQuery proDefQuery = repositoryService.createProcessDefinitionQuery().orderByDeploymentId().desc();
+		ProcessDefinitionQuery proDefQuery = repositoryService.createProcessDefinitionQuery().latestVersion().orderByDeploymentId().desc();
 		Integer totalSum = proDefQuery.list().size();
 		int[] pageParams = p.getPageParams(totalSum);
 		List<ProcessDefinition> processDefinitionList = proDefQuery.listPage(pageParams[0], pageParams[1]);

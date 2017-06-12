@@ -1,7 +1,9 @@
 package com.zml.oa.service.impl;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,6 +62,14 @@ public class UserTaskServiceImpl implements IUserTaskService {
 	@Override
 	public List<UserTask> getAll() throws Exception {
 		return this.baseService.getAllList("UserTask");
+	}
+
+	@Override
+	public void deleteByWhere(String proDefKey) {
+		String sql = "delete from T_USER_TASK where proc_def_key = :proDefKey";
+		Map<String,Object> map = new HashMap<>();
+		map.put("proDefKey", proDefKey);
+		this.jdbcDao.delete(sql, map);
 	}
 
 }

@@ -419,6 +419,33 @@ function setAuthor(){
     }
 }
 
+//加载单个流程定义
+function loadSingleBpmn(){
+	var row = bpmn_datagrid.datagrid('getSelected');
+	if (row) {
+		$.ajax({
+			type: "POST", 
+			url: ctx+"/permissionAction/loadSingleBpmn",
+			data: {processDefinitionId: row.id},
+			success: function (data) {
+				if(data=="ok"){
+					$.messager.show({
+						title:'提示',
+						msg:'加载完成',
+						showType:'fade',
+						style:{
+							right:'',
+							bottom:''
+						}
+					});
+				}
+			}
+		});
+	} else {
+		$.messager.alert("提示", "您未选择任何操作对象，请选择一行数据！");
+	}
+}
+
 //根据groupId显示人员列表的标签--choose_user.jsp
 function addTab(title, groupId, taskDefKey, multiSelect){
 	if ($('#userTabs').tabs('exists', title)){
